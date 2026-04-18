@@ -1,0 +1,1320 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SPU Queue Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --blue-900: #0a2d6e;
+      --blue-800: #0f3d8f;
+      --blue-700: #1251b8;
+      --blue-600: #1a66d4;
+      --blue-500: #2d7fff;
+      --blue-400: #5b9fff;
+      --blue-300: #93c4ff;
+      --blue-200: #c6e0ff;
+      --blue-100: #e5f0ff;
+      --blue-50: #f0f6ff;
+      --white: #ffffff;
+      --text-dark: #0a1f4e;
+      --text-mid: #3b5ea6;
+      --text-light: #7090c0;
+      --danger: #e53935;
+      --danger-light: #fff0f0;
+      --danger-border: #ffcccc;
+      --success: #1b8a4c;
+      --success-light: #edfaf3;
+      --success-border: #a3e4c1;
+      --warning: #b45309;
+      --warning-light: #fffbeb;
+      --warning-border: #fde68a;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Prompt", sans-serif;
+      background: var(--blue-50);
+      min-height: 100vh;
+      color: var(--text-dark);
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      top: -100px;
+      left: -100px;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(45, 127, 255, 0.12) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      bottom: -80px;
+      right: -80px;
+      width: 350px;
+      height: 350px;
+      background: radial-gradient(circle, rgba(15, 62, 143, 0.1) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ===== HEADER ===== */
+    .header {
+      background: linear-gradient(135deg, var(--blue-800), var(--blue-600));
+      padding: 0 40px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 24px rgba(10, 45, 110, 0.2);
+    }
+
+    .header-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 70px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .header-logo {
+      width: 40px;
+      height: 40px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .header-title {
+      color: white;
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    .header-subtitle {
+      color: rgba(255, 255, 255, 0.65);
+      font-size: 12px;
+      font-weight: 300;
+      margin-top: 2px;
+    }
+
+    .header-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 6px 14px;
+      border-radius: 999px;
+      color: white;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      background: #7ee8a2;
+      border-radius: 50%;
+      box-shadow: 0 0 0 3px rgba(126, 232, 162, 0.3);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 3px rgba(126, 232, 162, 0.3);
+      }
+
+      50% {
+        box-shadow: 0 0 0 6px rgba(126, 232, 162, 0.1);
+      }
+    }
+
+    /* ===== MAIN ===== */
+    .main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 24px 60px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ===== STATS ROW ===== */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+      animation: fadeUp 0.4s ease both;
+    }
+
+    .stat-card {
+      background: var(--white);
+      border-radius: 20px;
+      padding: 22px 20px;
+      border: 1px solid rgba(200, 220, 255, 0.6);
+      box-shadow: 0 4px 20px rgba(10, 45, 110, 0.07);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+
+    .stat-icon.blue {
+      background: var(--blue-100);
+    }
+
+    .stat-icon.green {
+      background: var(--success-light);
+    }
+
+    .stat-icon.warn {
+      background: var(--warning-light);
+    }
+
+    .stat-icon.red {
+      background: var(--danger-light);
+    }
+
+    .stat-info .label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-light);
+      margin-bottom: 4px;
+    }
+
+    .stat-info .value {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--blue-800);
+      line-height: 1;
+    }
+
+    /* ===== ACTION BAR ===== */
+    .action-bar {
+      background: var(--white);
+      border-radius: 20px;
+      padding: 20px 24px;
+      border: 1px solid rgba(200, 220, 255, 0.6);
+      box-shadow: 0 4px 20px rgba(10, 45, 110, 0.07);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      animation: fadeUp 0.4s 0.05s ease both;
+    }
+
+    .action-bar-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .action-bar-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--blue-900);
+    }
+
+    .action-bar-sub {
+      font-size: 13px;
+      font-weight: 300;
+      color: var(--text-light);
+      margin-top: 2px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 20px;
+      border-radius: 12px;
+      border: none;
+      font-family: "Prompt", sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--blue-600), var(--blue-500));
+      color: white;
+      box-shadow: 0 4px 14px rgba(45, 127, 255, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(45, 127, 255, 0.4);
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #1b8a4c, #22c55e);
+      color: white;
+      box-shadow: 0 4px 14px rgba(34, 197, 94, 0.25);
+    }
+
+    .btn-success:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(34, 197, 94, 0.35);
+    }
+
+    .btn-outline {
+      background: var(--blue-50);
+      color: var(--blue-700);
+      border: 1.5px solid var(--blue-200);
+    }
+
+    .btn-outline:hover {
+      background: var(--blue-100);
+      transform: translateY(-1px);
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #c62828, #e53935);
+      color: white;
+      box-shadow: 0 4px 14px rgba(229, 57, 53, 0.25);
+    }
+
+    .btn-danger:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(229, 57, 53, 0.35);
+    }
+
+    .btn:active {
+      transform: translateY(0) !important;
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    /* ===== TABLE CARD ===== */
+    .table-card {
+      background: var(--white);
+      border-radius: 20px;
+      border: 1px solid rgba(200, 220, 255, 0.6);
+      box-shadow: 0 4px 20px rgba(10, 45, 110, 0.07);
+      overflow: hidden;
+      animation: fadeUp 0.4s 0.1s ease both;
+    }
+
+    .table-card-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--blue-100);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .table-card-header h2 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--blue-900);
+    }
+
+    .queue-count-badge {
+      background: var(--blue-100);
+      color: var(--blue-700);
+      font-size: 13px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 999px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead th {
+      background: var(--blue-50);
+      color: var(--text-mid);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      padding: 12px 20px;
+      text-align: left;
+      border-bottom: 1px solid var(--blue-100);
+    }
+
+    thead th:last-child {
+      text-align: center;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid var(--blue-50);
+      transition: background 0.15s;
+    }
+
+    tbody tr:last-child {
+      border-bottom: none;
+    }
+
+    tbody tr:hover {
+      background: var(--blue-50);
+    }
+
+    tbody td {
+      padding: 14px 20px;
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--text-dark);
+      vertical-align: middle;
+    }
+
+    tbody td:last-child {
+      text-align: center;
+    }
+
+    .queue-num-cell {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--blue-700);
+      letter-spacing: 2px;
+    }
+
+    .name-cell {
+      font-weight: 600;
+      color: var(--text-dark);
+    }
+
+    .phone-cell {
+      color: var(--text-mid);
+      font-weight: 300;
+    }
+
+    /* Status badges */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .status-badge::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+
+    .status-waiting {
+      background: var(--blue-100);
+      color: var(--blue-800);
+    }
+
+    .status-waiting::before {
+      background: var(--blue-500);
+    }
+
+    .status-called {
+      background: var(--warning-light);
+      color: var(--warning);
+    }
+
+    .status-called::before {
+      background: #f59e0b;
+    }
+
+    .status-done {
+      background: var(--success-light);
+      color: var(--success);
+    }
+
+    .status-done::before {
+      background: #22c55e;
+    }
+
+    .status-cancelled {
+      background: var(--danger-light);
+      color: var(--danger);
+    }
+
+    .status-cancelled::before {
+      background: var(--danger);
+    }
+
+    /* Empty state */
+    .empty-state {
+      padding: 60px 20px;
+      text-align: center;
+    }
+
+    .empty-state .empty-icon {
+      font-size: 48px;
+      margin-bottom: 14px;
+    }
+
+    .empty-state p {
+      color: var(--text-light);
+      font-size: 15px;
+      font-weight: 300;
+    }
+
+    /* Loading row */
+    .loading-row td {
+      padding: 40px;
+      text-align: center;
+      color: var(--text-light);
+      font-size: 14px;
+    }
+
+    /* Current queue highlight */
+    .current-queue-row {
+      background: linear-gradient(90deg, rgba(45, 127, 255, 0.06), transparent) !important;
+      border-left: 3px solid var(--blue-500);
+    }
+
+    /* Toast notification */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: var(--blue-800);
+      color: white;
+      padding: 14px 22px;
+      border-radius: 14px;
+      font-size: 14px;
+      font-weight: 500;
+      box-shadow: 0 8px 32px rgba(10, 45, 110, 0.25);
+      transform: translateY(80px);
+      opacity: 0;
+      transition: all 0.3s ease;
+      z-index: 999;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .toast.toast-danger {
+      background: #c62828;
+    }
+
+    .toast.toast-success {
+      background: #1b8a4c;
+    }
+
+    /* Confirm modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 30, 80, 0.4);
+      backdrop-filter: blur(4px);
+      z-index: 500;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.show {
+      display: flex;
+    }
+
+    .modal {
+      background: white;
+      border-radius: 24px;
+      padding: 36px;
+      max-width: 380px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 24px 64px rgba(10, 45, 110, 0.2);
+      animation: fadeUp 0.25s ease;
+    }
+
+    .modal-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    .modal h3 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 10px;
+    }
+
+    .modal p {
+      font-size: 14px;
+      font-weight: 300;
+      color: var(--text-light);
+      line-height: 1.6;
+      margin-bottom: 28px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(16px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ===== REPORT MODAL ===== */
+    .report-modal {
+      max-width: 700px;
+      width: 95%;
+      text-align: left;
+      padding: 0;
+      overflow: hidden;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .report-modal-header {
+      padding: 28px 32px 20px;
+      border-bottom: 1px solid var(--blue-100);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      flex-shrink: 0;
+    }
+
+    .report-modal-header h3 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--blue-900);
+      margin-bottom: 4px;
+    }
+
+    .report-modal-header p {
+      font-size: 13px;
+      font-weight: 300;
+      color: var(--text-light);
+      margin: 0;
+    }
+
+    .btn-close-modal {
+      background: var(--blue-50);
+      border: 1px solid var(--blue-200);
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.15s;
+      font-family: "Prompt", sans-serif;
+    }
+
+    .btn-close-modal:hover {
+      background: var(--blue-100);
+    }
+
+    .report-modal-actions {
+      padding: 16px 32px;
+      border-bottom: 1px solid var(--blue-100);
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      flex-shrink: 0;
+    }
+
+    .report-modal-body {
+      padding: 24px 32px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .report-section {
+      margin-bottom: 28px;
+    }
+
+    .report-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .report-section-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--blue-900);
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 1.5px solid var(--blue-100);
+    }
+
+    .report-section-title .count-chip {
+      background: var(--blue-100);
+      color: var(--blue-700);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 999px;
+    }
+
+    .report-section-title .count-chip.danger {
+      background: var(--danger-light);
+      color: var(--danger);
+    }
+
+    .report-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    .report-table th {
+      background: var(--blue-50);
+      color: var(--text-mid);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      padding: 9px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--blue-100);
+    }
+
+    .report-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--blue-50);
+      color: var(--text-dark);
+      vertical-align: middle;
+    }
+
+    .report-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .report-table tr:hover td {
+      background: var(--blue-50);
+    }
+
+    .report-qnum {
+      font-weight: 800;
+      color: var(--blue-700);
+      letter-spacing: 2px;
+      font-size: 15px;
+    }
+
+    .report-empty {
+      padding: 24px;
+      text-align: center;
+      color: var(--text-light);
+      font-size: 14px;
+      font-weight: 300;
+      background: var(--blue-50);
+      border-radius: 12px;
+    }
+
+    .report-summary-bar {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .report-sum-box {
+      background: var(--blue-50);
+      border: 1px solid var(--blue-100);
+      border-radius: 14px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .report-sum-box .rs-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-light);
+      margin-bottom: 6px;
+      letter-spacing: 0.5px;
+    }
+
+    .report-sum-box .rs-value {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--blue-700);
+    }
+
+    .report-sum-box.danger .rs-value {
+      color: var(--danger);
+    }
+
+    .report-sum-box.success .rs-value {
+      color: var(--success);
+    }
+
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+
+      .report-modal,
+      .report-modal * {
+        visibility: visible;
+      }
+
+      .report-modal {
+        position: fixed;
+        inset: 0;
+        max-height: none;
+        box-shadow: none;
+        border-radius: 0;
+        width: 100%;
+        max-width: 100%;
+      }
+
+      .modal-overlay {
+        background: none;
+        backdrop-filter: none;
+      }
+
+      .report-modal-actions,
+      .btn-close-modal {
+        display: none !important;
+      }
+
+      .report-modal-body {
+        overflow: visible;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .stats-row {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .header {
+        padding: 0 20px;
+      }
+
+      .main {
+        padding: 20px 16px 40px;
+      }
+
+      .action-bar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .action-bar-left {
+        justify-content: center;
+      }
+
+      thead th:nth-child(3) {
+        display: none;
+      }
+
+      tbody td:nth-child(3) {
+        display: none;
+      }
+
+      .report-modal-header,
+      .report-modal-actions,
+      .report-modal-body {
+        padding-left: 20px;
+        padding-right: 20px;
+      }
+
+      .report-summary-bar {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-inner">
+      <div class="header-left">
+        <div class="header-logo">🏥</div>
+        <div>
+          <div class="header-title">SPU Queue Admin</div>
+          <div class="header-subtitle">ระบบจัดการคิวออนไลน์</div>
+        </div>
+      </div>
+      <div class="header-badge">
+        <div class="live-dot"></div>
+        Live System
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- STATS -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon blue">📋</div>
+        <div class="stat-info">
+          <div class="label">คิวทั้งหมด</div>
+          <div class="value" id="statTotal">-</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon blue">⏳</div>
+        <div class="stat-info">
+          <div class="label">รอดำเนินการ</div>
+          <div class="value" id="statWaiting">-</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon green">✅</div>
+        <div class="stat-info">
+          <div class="label">เสร็จสิ้น</div>
+          <div class="value" id="statDone">-</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon red">❌</div>
+        <div class="stat-info">
+          <div class="label">ยกเลิก</div>
+          <div class="value" id="statCancelled">-</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACTION BAR -->
+    <div class="action-bar">
+      <div>
+        <div class="action-bar-title">จัดการคิว</div>
+        <div class="action-bar-sub">คิวปัจจุบัน: <strong id="currentQueueLabel" style="color:var(--blue-700)">-</strong>
+        </div>
+      </div>
+      <div class="action-bar-left">
+        <button class="btn btn-outline" onclick="loadQueues()">
+          🔄 รีเฟรช
+        </button>
+        <button class="btn btn-success" onclick="nextQueue()">
+          ▶️ เรียกคิวถัดไป
+        </button>
+        <button class="btn btn-primary" onclick="openReport()">
+          📊 ออกรายงาน
+        </button>
+        <button class="btn btn-danger" onclick="confirmClear()">
+          🗑️ ล้างคิวทั้งหมด
+        </button>
+      </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-card">
+      <div class="table-card-header">
+        <h2>รายการคิวทั้งหมด</h2>
+        <span class="queue-count-badge" id="queueCountBadge">0 คิว</span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>หมายเลขคิว</th>
+            <th>ชื่อ - นามสกุล</th>
+            <th>เบอร์โทร</th>
+            <th>สถานะ</th>
+            <th>จัดการ</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <tr class="loading-row">
+            <td colspan="5">กำลังโหลดข้อมูล...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- CONFIRM MODAL -->
+  <div class="modal-overlay" id="clearModal">
+    <div class="modal">
+      <div class="modal-icon">🗑️</div>
+      <h3>ล้างคิวทั้งหมด?</h3>
+      <p>การดำเนินการนี้จะลบข้อมูลคิวทั้งหมดออกจากระบบ<br>ไม่สามารถกู้คืนได้</p>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="closeModal()">ยกเลิก</button>
+        <button class="btn btn-danger" onclick="clearQueues()">ยืนยัน ล้างคิว</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- REPORT MODAL -->
+  <div class="modal-overlay" id="reportModal">
+    <div class="modal report-modal">
+      <div class="report-modal-header">
+        <div>
+          <h3>📊 รายงานประจำวัน</h3>
+          <p id="reportDateLabel">วันที่ -</p>
+        </div>
+        <button class="btn-close-modal" onclick="closeReportModal()">✕</button>
+      </div>
+
+      <div class="report-modal-actions">
+        <button class="btn btn-primary" style="font-size:13px;padding:9px 16px;" onclick="downloadCSV()">
+          📥 ดาวน์โหลด CSV
+        </button>
+        <button class="btn btn-outline" style="font-size:13px;padding:9px 16px;" onclick="printReport()">
+          🖨️ พิมพ์ / บันทึก PDF
+        </button>
+      </div>
+
+      <div class="report-modal-body" id="reportBody">
+        <div style="text-align:center;padding:40px;color:var(--text-light)">⏳ กำลังโหลดรายงาน...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const API_BASE = "https://0kre8bwvn0.execute-api.ap-southeast-1.amazonaws.com";
+
+    function showToast(msg, type = "") {
+      const t = document.getElementById("toast");
+      t.className = `toast ${type ? "toast-" + type : ""}`;
+      t.innerHTML = msg;
+      t.classList.add("show");
+      setTimeout(() => t.classList.remove("show"), 3000);
+    }
+
+    function formatQueue(num) {
+      if (!num && num !== 0) return "----";
+      return String(num).padStart(4, "0");
+    }
+
+    function statusBadge(status) {
+      const map = {
+        waiting: { cls: "status-waiting", label: "รอเรียก" },
+        called: { cls: "status-called", label: "กำลังให้บริการ" },
+        done: { cls: "status-done", label: "เสร็จสิ้น" },
+        cancelled: { cls: "status-cancelled", label: "ยกเลิก" },
+      };
+      const s = map[status] || { cls: "status-waiting", label: status };
+      return `<span class="status-badge ${s.cls}">${s.label}</span>`;
+    }
+
+    async function loadQueues() {
+      const tbody = document.getElementById("tableBody");
+      tbody.innerHTML = `<tr class="loading-row"><td colspan="5">⏳ กำลังโหลดข้อมูล...</td></tr>`;
+
+      try {
+        const res = await fetch(`${API_BASE}/queues`);
+        const data = await res.json();
+        const queues = typeof data.body === "string" ? JSON.parse(data.body) : data;
+
+        // Stats
+        const total = queues.length;
+        const waiting = queues.filter(q => q.status === "waiting").length;
+        const done = queues.filter(q => q.status === "done").length;
+        const cancelled = queues.filter(q => q.status === "cancelled").length;
+        const called = queues.filter(q => q.status === "called");
+        const current = called.length > 0 ? called[called.length - 1] : null;
+
+        document.getElementById("statTotal").innerText = total;
+        document.getElementById("statWaiting").innerText = waiting;
+        document.getElementById("statDone").innerText = done;
+        document.getElementById("statCancelled").innerText = cancelled;
+        document.getElementById("queueCountBadge").innerText = `${total} คิว`;
+        document.getElementById("currentQueueLabel").innerText = current
+          ? `${formatQueue(current.queue_number)} (${current.name})`
+          : "ยังไม่มีคิวที่กำลังให้บริการ";
+
+        if (queues.length === 0) {
+          tbody.innerHTML = `
+            <tr><td colspan="5">
+              <div class="empty-state">
+                <div class="empty-icon">📭</div>
+                <p>ยังไม่มีข้อมูลคิวในระบบ</p>
+              </div>
+            </td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = queues.map(q => {
+          const isCurrent = current && q.queue_id === current.queue_id;
+          return `
+            <tr class="${isCurrent ? "current-queue-row" : ""}">
+              <td class="queue-num-cell">${formatQueue(q.queue_number)}</td>
+              <td class="name-cell">${q.name} ${isCurrent ? "🔔" : ""}</td>
+              <td class="phone-cell">${q.phone}</td>
+              <td>${statusBadge(q.status)}</td>
+              <td>
+                ${q.status !== "cancelled" && q.status !== "done"
+              ? `<button class="btn btn-danger" style="padding:7px 14px;font-size:13px;" onclick="cancelQueue('${q.queue_id}')">ยกเลิก</button>`
+              : `<span style="color:var(--text-light);font-size:13px;">-</span>`
+            }
+              </td>
+            </tr>`;
+        }).join("");
+
+      } catch (err) {
+        console.error(err);
+        tbody.innerHTML = `<tr class="loading-row"><td colspan="5">❌ เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>`;
+        showToast("❌ โหลดข้อมูลไม่สำเร็จ", "danger");
+      }
+    }
+
+    async function cancelQueue(id) {
+      try {
+        await fetch(`${API_BASE}/update-status`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ queue_id: id, status: "cancelled" })
+        });
+        showToast("✅ ยกเลิกคิวแล้ว", "success");
+        loadQueues();
+      } catch {
+        showToast("❌ ยกเลิกคิวไม่สำเร็จ", "danger");
+      }
+    }
+
+    async function nextQueue() {
+      try {
+        await fetch(`${API_BASE}/next-queue`, { method: "POST" });
+        showToast("▶️ เรียกคิวถัดไปแล้ว", "success");
+        loadQueues();
+      } catch {
+        showToast("❌ เรียกคิวไม่สำเร็จ", "danger");
+      }
+    }
+
+    function confirmClear() {
+      document.getElementById("clearModal").classList.add("show");
+    }
+
+    function closeModal() {
+      document.getElementById("clearModal").classList.remove("show");
+    }
+
+    async function clearQueues() {
+      closeModal();
+      try {
+        await fetch(`${API_BASE}/clear-queues`, { method: "POST" });
+        showToast("🗑️ ล้างคิวทั้งหมดแล้ว", "danger");
+        loadQueues();
+      } catch {
+        showToast("❌ ล้างคิวไม่สำเร็จ", "danger");
+      }
+    }
+
+    // Auto refresh every 10s
+    loadQueues();
+    setInterval(loadQueues, 10000);
+
+    // ===== REPORT =====
+    let _reportQueues = [];
+
+    function thaiDate(d) {
+      return d.toLocaleDateString("th-TH", {
+        year: "numeric", month: "long", day: "numeric",
+        weekday: "long"
+      });
+    }
+
+    async function openReport() {
+      document.getElementById("reportModal").classList.add("show");
+      document.getElementById("reportBody").innerHTML =
+        `<div style="text-align:center;padding:40px;color:var(--text-light)">⏳ กำลังโหลดรายงาน...</div>`;
+
+      const today = new Date();
+      document.getElementById("reportDateLabel").innerText = "วันที่ " + thaiDate(today);
+
+      try {
+        const res = await fetch(`${API_BASE}/queues`);
+        const data = await res.json();
+        _reportQueues = typeof data.body === "string" ? JSON.parse(data.body) : data;
+        renderReport(_reportQueues);
+      } catch {
+        document.getElementById("reportBody").innerHTML =
+          `<div style="text-align:center;padding:40px;color:var(--danger)">❌ โหลดข้อมูลไม่สำเร็จ</div>`;
+      }
+    }
+
+    function renderReport(queues) {
+      const all = queues;
+      const cancelled = queues.filter(q => q.status === "cancelled");
+      const active = queues.filter(q => q.status !== "cancelled");
+      const done = queues.filter(q => q.status === "done");
+
+      const rowsAll = active.length > 0
+        ? active.map((q, i) => `
+            <tr>
+              <td>${i + 1}</td>
+              <td class="report-qnum">${formatQueue(q.queue_number)}</td>
+              <td style="font-weight:600">${q.name}</td>
+              <td style="color:var(--text-mid)">${q.phone}</td>
+              <td>${statusBadge(q.status)}</td>
+            </tr>`).join("")
+        : `<tr><td colspan="5"><div class="report-empty">ไม่มีข้อมูล</div></td></tr>`;
+
+      const rowsCancelled = cancelled.length > 0
+        ? cancelled.map((q, i) => `
+            <tr>
+              <td>${i + 1}</td>
+              <td class="report-qnum">${formatQueue(q.queue_number)}</td>
+              <td style="font-weight:600">${q.name}</td>
+              <td style="color:var(--text-mid)">${q.phone}</td>
+            </tr>`).join("")
+        : `<tr><td colspan="4"><div class="report-empty">ไม่มีรายการยกเลิก</div></td></tr>`;
+
+      document.getElementById("reportBody").innerHTML = `
+        <!-- Summary -->
+        <div class="report-summary-bar">
+          <div class="report-sum-box">
+            <div class="rs-label">จองคิวทั้งหมด</div>
+            <div class="rs-value">${all.length}</div>
+          </div>
+          <div class="report-sum-box success">
+            <div class="rs-label">เสร็จสิ้น</div>
+            <div class="rs-value">${done.length}</div>
+          </div>
+          <div class="report-sum-box danger">
+            <div class="rs-label">ยกเลิก</div>
+            <div class="rs-value">${cancelled.length}</div>
+          </div>
+        </div>
+
+        <!-- Section 1: All bookings -->
+        <div class="report-section">
+          <div class="report-section-title">
+            📋 ลูกค้าที่จองคิววันนี้
+            <span class="count-chip">${active.length} คน</span>
+          </div>
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>คิว</th>
+                <th>ชื่อ - นามสกุล</th>
+                <th>เบอร์โทร</th>
+                <th>สถานะ</th>
+              </tr>
+            </thead>
+            <tbody>${rowsAll}</tbody>
+          </table>
+        </div>
+
+        <!-- Section 2: Cancelled -->
+        <div class="report-section">
+          <div class="report-section-title">
+            ❌ รายชื่อที่ยกเลิกการจองคิว
+            <span class="count-chip danger">${cancelled.length} คน</span>
+          </div>
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>คิว</th>
+                <th>ชื่อ - นามสกุล</th>
+                <th>เบอร์โทร</th>
+              </tr>
+            </thead>
+            <tbody>${rowsCancelled}</tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function closeReportModal() {
+      document.getElementById("reportModal").classList.remove("show");
+    }
+
+    function downloadCSV() {
+      if (!_reportQueues.length) { showToast("❌ ไม่มีข้อมูล", "danger"); return; }
+
+      const today = new Date().toLocaleDateString("th-TH");
+      const header = ["ลำดับ", "หมายเลขคิว", "ชื่อ-นามสกุล", "เบอร์โทร", "สถานะ"];
+      const statusTH = { waiting: "รอเรียก", called: "กำลังให้บริการ", done: "เสร็จสิ้น", cancelled: "ยกเลิก" };
+
+      const rows = _reportQueues.map((q, i) => [
+        i + 1,
+        formatQueue(q.queue_number),
+        q.name,
+        q.phone,
+        statusTH[q.status] || q.status
+      ]);
+
+      const csv = "\uFEFF" + [header, ...rows]
+        .map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(","))
+        .join("\n");
+
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `queue-report-${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast("📥 ดาวน์โหลด CSV แล้ว", "success");
+    }
+
+    function printReport() {
+      window.print();
+    }
+  </script>
+</body>
+
+</html>
