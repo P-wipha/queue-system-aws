@@ -46,8 +46,6 @@ flowchart TD
     style E fill:#c8d8f5,stroke:#90b0e8,color:#333
 ```
 
----
-
 ## ☁️ เทคโนโลยีที่ใช้
 
 | บริการ | หน้าที่ |
