@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🎀 ระบบจองคิวออนไลน์บน AWS
+# ระบบจองคิวออนไลน์บน AWS
 ### Cloud Queue Booking System
 
 ![AWS](https://img.shields.io/badge/AWS-Serverless-f9c6d0?style=flat-square&logo=amazonaws&logoColor=c47a85)
@@ -74,20 +74,21 @@ flowchart TD
 ---
 
 ## 📁 โครงสร้างโปรเจกต์
-queue-system-aws/
-├── 📄 README.md
-├── 🌐 frontend/
-│   ├── index.html        # หน้าจองคิวฝั่งลูกค้า
-│   └── admin.html        # หน้าจัดการคิวฝั่งแอดมิน
-└── ⚡ lambda/
-├── createQueue.py
-├── getQueues.py
-├── getQueueByPhone.py
-├── getCurrentQueue.py
-├── nextQueue.py
-├── updateQueueStatus.py
-└── clearAllQueues.py
 
+```
+queue-system-aws/
+├── README.md
+├── frontend/
+│   ├── index.html
+│   └── admin.html
+└── lambda/
+    ├── createQueue.py
+    ├── getQueues.py
+    ├── getQueueByPhone.py
+    ├── getCurrentQueue.py
+    ├── nextQueue.py
+    ├── updateQueueStatus.py
+    └── clearAllQueues.py
 ---
 
 ## 🌐 ลิงก์เว็บไซต์จริง
