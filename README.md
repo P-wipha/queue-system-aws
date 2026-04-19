@@ -32,21 +32,19 @@
 ---
 
 ## 🏗️ สถาปัตยกรรมระบบ
-ผู้ใช้งาน (Browser)
-│
-▼
-🪣 Amazon S3
-(index.html / admin.html)
-│
-▼
-🔗 Amazon API Gateway
-│
-▼
-⚡ AWS Lambda  ── 7 Functions (Python)
-│
-▼
-🗄️ Amazon DynamoDB
-(queue_db)
+```mermaid
+flowchart TD
+    A[👤 ผู้ใช้งาน Browser] --> B[🪣 Amazon S3\nindex.html / admin.html]
+    B --> C[🔗 Amazon API Gateway]
+    C --> D[⚡ AWS Lambda\n7 Functions Python]
+    D --> E[🗄️ Amazon DynamoDB\nqueue_db]
+
+    style A fill:#fde8f0,stroke:#f4a7c3,color:#333
+    style B fill:#fdf5c8,stroke:#f0d060,color:#333
+    style C fill:#e8d5f5,stroke:#c4a0e8,color:#333
+    style D fill:#c9e4ca,stroke:#90c490,color:#333
+    style E fill:#c8d8f5,stroke:#90b0e8,color:#333
+```
 
 ---
 
